@@ -1,0 +1,6 @@
+START
+INPUT a
+INPUT b
+sum = a + b
+OUTPUT sum
+END
