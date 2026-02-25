@@ -2,6 +2,8 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <sstream>
+
 
 using namespace std;
 
@@ -29,7 +31,23 @@ int main(int argc, char* argv[]) {
 
     file.close();
 
+    
+    for(int i = 0; i < Buffer.size(); ++i){
+        
+        string currentLine = Buffer[i];
+        
+        //skip blank
+        if(currentLine.empty()) continue; 
 
+        //seperate words
+        stringstream ss(currentLine); 
+        
+        //get the fist word
+        string command;
+        ss >> command;
+
+        cout << "Line " << (i+1) << " Command: " << command << endl;
+    }
 
     return 0;
 }
