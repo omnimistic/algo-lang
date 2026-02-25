@@ -1,15 +1,19 @@
 START
-DECLARE count, secret
-count = 1
-secret = 0
-OUTPUT "--- Starting the Loop ---"
-OUTPUT count
-IF count == 3 OUTPUT "We are exactly halfway there!"
-IF count == 5 secret = 42
-count = count + 1
-IF count <= 5 GOTO 5
-OUTPUT "--- Loop Finished ---"
-OUTPUT "The secret number is:"
-OUTPUT secret
-IF secret != 0 OUTPUT "SUCCESS: Inline variable assignment worked!"
+DECLARE n, i, j, is_prime, rem
+INPUT n
+i = 2
+IF i > n GOTO 19
+j = 2
+is_prime = 1
+IF j == i GOTO 15
+rem = i % j
+IF rem == 0 GOTO 13
+j = j + 1
+GOTO 8
+is_prime = 0
+GOTO 15
+IF is_prime == 0 GOTO 17
+OUTPUT i
+i = i + 1
+GOTO 5
 END

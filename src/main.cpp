@@ -159,6 +159,10 @@ void executeLine(string line, int& i, const vector<string>& Buffer) {
     stringstream ss(line);
     string command;
     ss >> command;
+    //if the line starts with //, completely ignore it and stop processing
+    if (command.length() >= 2 && command.substr(0, 2) == "//") {
+        return; 
+    }
 
     if (command == "END") {
         isRunning = false; //strop executing
