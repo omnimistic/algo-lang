@@ -1,12 +1,17 @@
 START
-INPUT base
-INPUT height
-area = (base * height) / 2
-OUTPUT area
+DECLARE x, y, result
 x = 10
-y = 5
-complex = (x + y) * (x - y)
-OUTPUT complex
-result = 100 + (base * 2)
+y = 20
+result = x + y
 OUTPUT result
+// TEST 1: Redeclaring a variable (Should throw an error)
+DECLARE x
+
+// TEST 2: Using a variable that was never declared (Should throw an error)
+z = 50
+OUTPUT z
+
+// TEST 3: Using an undeclared variable inside doMaths (Should throw an error)
+result = x + unknown_var
+
 END
