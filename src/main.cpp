@@ -138,7 +138,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    //copies the file text into buffer
+    //copies the file text into "Buffer"
     vector<string> Buffer;
     string line;
 
@@ -214,6 +214,20 @@ int main(int argc, char* argv[]) {
 
             //find in the map and print it
             cout << ">> " << variables[varName] << endl;
+        }
+        else if (command == "GOTO") {
+            int targetLine;
+            ss >> targetLine;
+
+            //make sure the line exists in Buffer
+            if (targetLine > 0 && targetLine <= Buffer.size()) {
+                //fun trick here, target line - 1 to adjust for 0 index and
+                //then another -1 so that the ++i of loop runs the actual line required
+                i = targetLine - 2;
+            }
+            else {
+                cout << "Error: Line " << targetLine << " does not exist!" << endl;
+            }
         }
         else {
             //ARITHMETIC LOGIC
