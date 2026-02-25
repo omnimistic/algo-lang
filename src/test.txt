@@ -1,26 +1,15 @@
 START
-DECLARE input_val, pi, radius, area, mod_test
-OUTPUT "--- Smart I/O Test ---"
-OUTPUT "Type a word in quotes (like "AlgoLang") or a decimal:"
-INPUT input_val
-OUTPUT "You successfully stored:"
-OUTPUT input_val
-
-OUTPUT "--- Float & Math Test ---"
-pi = 22.0 / 7.0
-radius = 5.5
-area = pi * (radius * radius)
-OUTPUT "Area of circle with radius 5.5 is:"
-OUTPUT area
-
-OUTPUT "--- Modulo Test ---"
-mod_test = 10.5 % 3
-OUTPUT "10.5 % 3 equals:"
-OUTPUT mod_test
-
-OUTPUT "--- GOTO Jump Test ---"
-OUTPUT "Preparing to jump..."
-GOTO 25
-OUTPUT "FAIL: If you see this, GOTO is broken!"
-OUTPUT "SUCCESS: Landed safely!"
+DECLARE count, secret
+count = 1
+secret = 0
+OUTPUT "--- Starting the Loop ---"
+OUTPUT count
+IF count == 3 OUTPUT "We are exactly halfway there!"
+IF count == 5 secret = 42
+count = count + 1
+IF count <= 5 GOTO 5
+OUTPUT "--- Loop Finished ---"
+OUTPUT "The secret number is:"
+OUTPUT secret
+IF secret != 0 OUTPUT "SUCCESS: Inline variable assignment worked!"
 END
