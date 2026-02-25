@@ -1,8 +1,26 @@
 START
-DECLARE val
-val = 100
-OUTPUT val
-GOTO 7
-val = 500
-OUTPUT val
+DECLARE input_val, pi, radius, area, mod_test
+OUTPUT "--- Smart I/O Test ---"
+OUTPUT "Type a word in quotes (like "AlgoLang") or a decimal:"
+INPUT input_val
+OUTPUT "You successfully stored:"
+OUTPUT input_val
+
+OUTPUT "--- Float & Math Test ---"
+pi = 22.0 / 7.0
+radius = 5.5
+area = pi * (radius * radius)
+OUTPUT "Area of circle with radius 5.5 is:"
+OUTPUT area
+
+OUTPUT "--- Modulo Test ---"
+mod_test = 10.5 % 3
+OUTPUT "10.5 % 3 equals:"
+OUTPUT mod_test
+
+OUTPUT "--- GOTO Jump Test ---"
+OUTPUT "Preparing to jump..."
+GOTO 25
+OUTPUT "FAIL: If you see this, GOTO is broken!"
+OUTPUT "SUCCESS: Landed safely!"
 END

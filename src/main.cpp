@@ -5,13 +5,26 @@
 #include <sstream>
 #include <map>
 #include <cctype>
+#include <cmath>
 
 using namespace std;
 
-map<string, int> variables;
+enum DataType { TYPE_INT, TYPE_FLOAT, TYPE_STRING };
+
+struct varValue {
+    DataType type = TYPE_INT;
+    int i_val = 0;
+    float f_val = 0.0f;
+    string s_val = "";
+};
+
+//language ka RAM that we use for storing variables
+map<string, varValue> variables;
 
 bool isRunning = false;
 
+//removes leading and trailing spaces from a string
+//scans for the first and last actual characters, then extracts only that portion.
 string trim(const string& str) {
     size_t first = str.find_first_not_of(" \t");
     if (first == string::npos) return "";
@@ -27,52 +40,59 @@ bool checkVarExists(const string& varName) {
     return true;
 }
 
-int doMaths(const string& expression) {
 
+float doMaths(const string& expression) {
+
+    //local struct so that i can write functions inside a fucntion because cant do that by default in C++
     struct Parser {
 
+        //moves the pointer forward to ignore spaces and tabs
         void skipWhitespace(const string& str, size_t& pos) {
             while (pos < str.length() && isspace(str[pos])) {
                 pos++;
             }
         }
 
-        int parseFactor(const string& str, size_t& pos) {
+        //reads a word, if digit, converts to float, if letters, pulls the value from variables map
+        //also handles negative sign and restarts if it sees ( ).
+        float parseFactor(const string& str, size_t& pos) {
             skipWhitespace(str, pos);
-            if (pos >= str.length()) return 0;
+            if (pos >= str.length()) return 0.0f;
 
-            int sign = 1;
+            float sign = 1.0f;
             if (str[pos] == '-') {
-                sign = -1;
+                sign = -1.0f;
                 pos++;
                 skipWhitespace(str, pos);
             }
 
             if (str[pos] == '(') {
                 pos++;
-                int val = parseExpression(str, pos);
+                float val = parseExpression(str, pos);
                 skipWhitespace(str, pos);
                 if (pos < str.length() && str[pos] == ')') pos++;
                 return sign * val;
             }
 
             string token = "";
-            while (pos < str.length() && (isalnum(str[pos]) || str[pos] == '_')) {
+            while (pos < str.length() && (isalnum(str[pos]) || str[pos] == '_' || str[pos] == '.')) {
                 token += str[pos++];
             }
 
-            if (token.empty()) return 0;
+            if (token.empty()) return 0.0f;
 
-            if (isdigit(token[0])) {
-                return sign * stoi(token);
+            if (isdigit(token[0]) || token[0] == '.') {
+                return sign * stof(token);
             } else {
-                if (!checkVarExists(token)) return 0;
-                return sign * variables[token]; // Looks up the global variables map
+                if (!checkVarExists(token)) return 0.0f;
+                return sign * variables[token].f_val;
             }
         }
         
-        int parseTerm(const string& str, size_t& pos) {
-            int val = parseFactor(str, pos);
+        //handles multiplication, division, and modulus
+        //makes sure these happen before addition or subtraction.
+        float parseTerm(const string& str, size_t& pos) {
+            float val = parseFactor(str, pos);
             while (true) {
                 skipWhitespace(str, pos);
                 if (pos >= str.length()) break;
@@ -81,23 +101,26 @@ int doMaths(const string& expression) {
                 if (op != '*' && op != '/' && op != '%') break;
                 
                 pos++;
-                int nextVal = parseFactor(str, pos);
+                float nextVal = parseFactor(str, pos);
                 
                 if (op == '*') val *= nextVal;
                 else if (op == '/') {
-                    if (nextVal != 0) val /= nextVal;
+                    if (nextVal != 0.0f) val /= nextVal;
                     else cout << "Error: Division by zero!" << endl;
                 }
                 else if (op == '%') {
-                     if (nextVal != 0) val %= nextVal;
+                     // % symbol doesn't work on floats in C++ so fmod is used
+                     if (nextVal != 0.0f) val = fmod(val, nextVal);
                      else cout << "Error: Modulo by zero!" << endl;
                 }
             }
             return val;
         }
         
-        int parseExpression(const string& str, size_t& pos) {
-            int val = parseTerm(str, pos);
+        //handles addition and subtraction.
+        //starting funciton of the parser
+        float parseExpression(const string& str, size_t& pos) {
+            float val = parseTerm(str, pos);
             while (true) {
                 skipWhitespace(str, pos);
                 if (pos >= str.length()) break;
@@ -106,7 +129,7 @@ int doMaths(const string& expression) {
                 if (op != '+' && op != '-') break;
                 
                 pos++;
-                int nextVal = parseTerm(str, pos);
+                float nextVal = parseTerm(str, pos);
                 
                 if (op == '+') val += nextVal;
                 else if (op == '-') val -= nextVal;
@@ -188,7 +211,7 @@ int main(int argc, char* argv[]) {
                     if (variables.count(varName) > 0) {
                         cout << "Error: Variable '" << varName << "' already declared!" << endl;
                     } else {
-                        variables[varName] = 0;
+                        variables[varName] = varValue();
                     }
                 }
             }
@@ -200,20 +223,67 @@ int main(int argc, char* argv[]) {
             if (!checkVarExists(varName)) continue;
 
             cout << "Enter value for " << varName << ": ";
-            int value;
-            cin >> value;
+            string rawInput;
+            getline(cin >> ws, rawInput);
+            
+            varValue newVal;
+
+            //checks if starts with quote for string
+            if (rawInput[0] == '"') {
+                newVal.type = TYPE_STRING;
+                size_t lastQuote = rawInput.find_last_of('"');
+                if (lastQuote != string::npos && lastQuote > 0) {
+                    newVal.s_val = rawInput.substr(1, lastQuote - 1);
+                } else {
+                    newVal.s_val = rawInput.substr(1);
+                }
+            }
+            //checks if it has a dot for float
+            else if (rawInput.find('.') != string::npos) {
+                newVal.type = TYPE_FLOAT;
+                try { newVal.f_val = stof(rawInput); } catch(...) { newVal.f_val = 0.0f; }
+                newVal.i_val = (int)newVal.f_val; 
+            }
+            //otherwise assumes its an integer
+            else {
+                newVal.type = TYPE_INT;
+                try { newVal.i_val = stoi(rawInput); } catch(...) { newVal.i_val = 0; }
+                newVal.f_val = (float)newVal.i_val; 
+            }
             
             //save it to map
-            variables[varName] = value;
+            variables[varName] = newVal;
         }
         else if (command == "OUTPUT") {
-            string varName;
-            ss >> varName;
-            
-            if (!checkVarExists(varName)) continue;
+            string restOfLine;
+            getline(ss, restOfLine);
+            restOfLine = trim(restOfLine); 
 
-            //find in the map and print it
-            cout << ">> " << variables[varName] << endl;
+            if (restOfLine.empty()) continue;
+
+            //if string literal
+            if (restOfLine[0] == '"') {
+                size_t lastQuote = restOfLine.find_last_of('"');
+                if (lastQuote != string::npos && lastQuote > 0) {
+                    cout << ">> " << restOfLine.substr(1, lastQuote - 1) << endl;
+                } else {
+                    cout << "Error: Missing closing quote in OUTPUT!" << endl;
+                }
+            }
+            //if raw number
+            else if (isdigit(restOfLine[0]) || (restOfLine[0] == '-' && restOfLine.length() > 1 && isdigit(restOfLine[1]))) {
+                cout << ">> " << restOfLine << endl;
+            }
+            //else must be a variable
+            else {
+                if (!checkVarExists(restOfLine)) continue;
+                
+                //find in the map and print it
+                varValue v = variables[restOfLine];
+                if (v.type == TYPE_INT) cout << ">> " << v.i_val << endl;
+                else if (v.type == TYPE_FLOAT) cout << ">> " << v.f_val << endl;
+                else if (v.type == TYPE_STRING) cout << ">> " << v.s_val << endl;
+            }
         }
         else if (command == "GOTO") {
             int targetLine;
@@ -241,7 +311,17 @@ int main(int argc, char* argv[]) {
                 string expression;
                 //take the mathematical expression and pass it to doMaths
                 getline(ss, expression);
-                variables[targetVar] = doMaths(expression);
+                
+                float result = doMaths(expression);
+                
+                variables[targetVar].f_val = result;
+                variables[targetVar].i_val = (int)result;
+
+                if (result == (int)result) {
+                    variables[targetVar].type = TYPE_INT;
+                } else {
+                    variables[targetVar].type = TYPE_FLOAT;
+                }
             }
         }
     }
