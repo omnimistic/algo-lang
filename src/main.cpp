@@ -13,6 +13,108 @@ map<string, int> variables;
 bool isRunning = false;
 
 
+int doMaths(const string& expression) {
+
+    //local struct so that i can write functions inside a fucntion because cant do that by default in C++
+    struct Parser {
+
+        //moves the pointer forward to ignore spaces and tabs
+        void skipWhitespace(const string& str, size_t& pos) {
+            while (pos < str.length() && isspace(str[pos])) {
+                pos++;
+            }
+        }
+
+        //reads a word, if digit, converts to integer, if letters, pulls the value from variables map
+        //also handles negative sign and restarts if it sees ( ).
+        int parseFactor(const string& str, size_t& pos) {
+            skipWhitespace(str, pos);
+            if (pos >= str.length()) return 0;
+
+            int sign = 1;
+            if (str[pos] == '-') {
+                sign = -1;
+                pos++;
+                skipWhitespace(str, pos);
+            }
+
+            if (str[pos] == '(') {
+                pos++;
+                int val = parseExpression(str, pos);
+                skipWhitespace(str, pos);
+                if (pos < str.length() && str[pos] == ')') pos++;
+                return sign * val;
+            }
+
+            string token = "";
+            while (pos < str.length() && (isalnum(str[pos]) || str[pos] == '_')) {
+                token += str[pos++];
+            }
+
+            if (token.empty()) return 0;
+
+            if (isdigit(token[0])) {
+                return sign * stoi(token);
+            } else {
+                return sign * variables[token]; // Looks up the global variables map
+            }
+        }
+        
+        //handles multiplication, division, and modulus
+        //makes sure these happen before addition or subtraction.
+        int parseTerm(const string& str, size_t& pos) {
+            int val = parseFactor(str, pos);
+            while (true) {
+                skipWhitespace(str, pos);
+                if (pos >= str.length()) break;
+                
+                char op = str[pos];
+                if (op != '*' && op != '/' && op != '%') break;
+                
+                pos++;
+                int nextVal = parseFactor(str, pos);
+                
+                if (op == '*') val *= nextVal;
+                else if (op == '/') {
+                    if (nextVal != 0) val /= nextVal;
+                    else cout << "Error: Division by zero!" << endl;
+                }
+                else if (op == '%') {
+                     if (nextVal != 0) val %= nextVal;
+                     else cout << "Error: Modulo by zero!" << endl;
+                }
+            }
+            return val;
+        }
+        
+        //handles addition and subtraction.
+        //starting funciton of the parser
+        int parseExpression(const string& str, size_t& pos) {
+            int val = parseTerm(str, pos);
+            while (true) {
+                skipWhitespace(str, pos);
+                if (pos >= str.length()) break;
+                
+                char op = str[pos];
+                if (op != '+' && op != '-') break;
+                
+                pos++;
+                int nextVal = parseTerm(str, pos);
+                
+                if (op == '+') val += nextVal;
+                else if (op == '-') val -= nextVal;
+            }
+            return val;
+        }
+    };
+
+    //instantiate the local parser and do the calculation
+    Parser p;
+    size_t pos = 0;
+    return p.parseExpression(expression, pos);
+}
+
+
 int main(int argc, char* argv[]) {
 
     if (argc < 2){
@@ -78,7 +180,7 @@ int main(int argc, char* argv[]) {
             
             //save it to map
             variables[varName] = value;
-        } 
+        }
         else if (command == "OUTPUT") {
             string varName;
             ss >> varName;
@@ -87,7 +189,19 @@ int main(int argc, char* argv[]) {
             cout << ">> " << variables[varName] << endl;
         }
         else {
-            //pass
+            //ARITHMETIC LOGIC
+            string targetVar = command;
+            string equalsSign;
+            ss >> equalsSign;
+
+            if (equalsSign == "=") {
+                string expression;
+                // Grab the entire rest of the mathematical equation
+                getline(ss, expression); 
+                
+                // Pass it to the Do_maths function and save the answer!
+                variables[targetVar] = doMaths(expression);
+            }
         }
     }
 

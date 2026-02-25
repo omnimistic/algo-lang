@@ -1,6 +1,12 @@
 START
-INPUT a
-INPUT b
-sum = a + b
-OUTPUT sum
+INPUT base
+INPUT height
+area = (base * height) / 2
+OUTPUT area
+x = 10
+y = 5
+complex = (x + y) * (x - y)
+OUTPUT complex
+result = 100 + (base * 2)
+OUTPUT result
 END
