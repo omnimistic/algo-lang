@@ -1,0 +1,20 @@
+START
+DECLARE n, a, b, temp, count
+OUTPUT "How many Fibonacci numbers do you want?"
+INPUT n
+
+a = 0
+b = 1
+count = 0
+
+OUTPUT "Sequence:"
+WHILE count < n
+    OUTPUT a
+    temp = a + b
+    a = b
+    b = temp
+    count = count + 1
+ENDWHILE
+
+OUTPUT "Done!"
+END

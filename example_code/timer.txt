@@ -1,0 +1,13 @@
+START
+DECLARE timer
+INPUT timer
+
+// Line 5: The start of the loop
+OUTPUT timer
+timer = timer - 1
+
+// If timer is still positive, jump back to line 5
+IF timer >= 0 GOTO 5
+
+OUTPUT "Blast off!"
+END

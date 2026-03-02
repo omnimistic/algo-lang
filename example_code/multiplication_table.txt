@@ -1,0 +1,14 @@
+START
+DECLARE num, i, result
+OUTPUT "Enter a number to see its multiplication table:"
+INPUT num
+
+i = 1
+WHILE i <= 10
+    result = num * i
+    OUTPUT result
+    i = i + 1
+ENDWHILE
+
+OUTPUT "Table Complete!"
+END

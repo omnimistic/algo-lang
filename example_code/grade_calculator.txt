@@ -1,0 +1,23 @@
+START
+DECLARE score
+OUTPUT "Enter the student's score (0-100):"
+INPUT score
+
+IF score >= 90
+    OUTPUT "Grade: A"
+ENDIF
+ELIF score >= 80
+    OUTPUT "Grade: B"
+ENDELIF
+ELIF score >= 70
+    OUTPUT "Grade: C"
+ENDELIF
+ELIF score >= 60
+    OUTPUT "Grade: D"
+ENDELIF
+ELSE
+    OUTPUT "Grade: F (Better luck next time!)"
+ENDELSE
+
+OUTPUT "Processing complete."
+END

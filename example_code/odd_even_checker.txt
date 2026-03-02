@@ -1,0 +1,9 @@
+START
+DECLARE num, rem
+INPUT num
+rem = num % 2
+IF rem == 1 GOTO 8
+OUTPUT "EVEN"
+GOTO 9
+OUTPUT "ODD"
+END

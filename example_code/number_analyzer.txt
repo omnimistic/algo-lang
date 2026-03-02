@@ -1,0 +1,25 @@
+START
+DECLARE num, loops
+loops = 0
+
+OUTPUT "Welcome to the Number Analyzer."
+
+WHILE loops < 3
+    OUTPUT "Please enter a number:"
+    INPUT num
+    
+    IF num > 0
+        OUTPUT "That is a POSITIVE number."
+    ENDIF
+    ELIF num < 0
+        OUTPUT "That is a NEGATIVE number."
+    ENDELIF
+    ELSE
+        OUTPUT "That is exactly ZERO."
+    ENDELSE
+    
+    loops = loops + 1
+ENDWHILE
+
+OUTPUT "Analysis finished. Goodbye!"
+END
