@@ -154,6 +154,27 @@ float doMaths(const string& expression) {
     return p.parseExpression(expression, pos);
 }
 
+//finds the matching ENDWHILE for a given WHILE statement
+int findEndWhile(int startIndex, const vector<string>& Buffer) {
+    int whileCount = 1;  // tracks nested while loops, this as a counter so that if we find another WHILE, we know that it is a nested while and find for another ENDWHILE
+    for (int i = startIndex + 1; i < Buffer.size(); i++) {
+        string currentLine = Buffer[i];
+        stringstream ss(currentLine);
+        string command;
+        ss >> command;
+        
+        if (command == "WHILE") {
+            whileCount++;
+        } else if (command == "ENDWHILE") {
+            whileCount--;
+            if (whileCount == 0) {
+                return i;
+            }
+        }
+    }
+    return -1;  // ENDWHILE not found (syntax error lol!)
+}
+
 //engine that processes a single line, moved here so IF can call it recursively
 void executeLine(string line, int& i, const vector<string>& Buffer) {
     stringstream ss(line);
@@ -314,6 +335,67 @@ void executeLine(string line, int& i, const vector<string>& Buffer) {
                 }
             }
         }
+    }
+    else if (command == "WHILE") {
+        // Parse: WHILE leftVar op rightVar
+        string leftSide, op, rightSide;
+        ss >> leftSide >> op >> rightSide;
+        
+        // Validate operator
+        if (op != "==" && op != "!=" && op != "<" && op != ">" && op != "<=" && op != ">=") {
+            cout << "Error: Unknown operator '" << op << "' in WHILE statement!" << endl;
+            return;
+        }
+        
+        // Find foor the matching ENDWHILE
+        int endWhileIndex = findEndWhile(i, Buffer);
+        if (endWhileIndex == -1) {
+            cout << "Error: Matching ENDWHILE not found!" << endl;
+            return;
+        }
+        
+        // Loop while condition is true
+        int maxIterations = 1000000;  // prevent infinite loops, I feel there might be a better way to do this but for now this is a simple safeguard
+        int iterations = 0;
+        
+        while (iterations < maxIterations) {
+            // Evaluate condition
+            float leftVal = getValue(leftSide);
+            float rightVal = getValue(rightSide);
+            
+            bool conditionMet = false;
+            if (op == "==") conditionMet = (leftVal == rightVal);
+            else if (op == "!=") conditionMet = (leftVal != rightVal);
+            else if (op == "<") conditionMet = (leftVal < rightVal);
+            else if (op == ">") conditionMet = (leftVal > rightVal);
+            else if (op == "<=") conditionMet = (leftVal <= rightVal);
+            else if (op == ">=") conditionMet = (leftVal >= rightVal);
+            
+            // Break if condition is false
+            if (!conditionMet) {
+                break;
+            }
+            
+            // Execute the loop body
+            for (int j = i + 1; j < endWhileIndex; j++) {
+                string loopBodyLine = Buffer[j];
+                if (loopBodyLine.empty()) continue;
+                
+                int jTemp = j;
+                executeLine(loopBodyLine, jTemp, Buffer);
+                j = jTemp;
+                
+                if (!isRunning) return;
+            }
+            iterations++;
+        }
+        
+        if (iterations >= maxIterations) {
+            cout << "Error: WHILE loop exceeded maximum iterations (likely infinite loop)!" << endl;
+        }
+        
+        // Jump past ENDWHILE
+        i = endWhileIndex;
     }
     else {
         //ARITHMETIC LOGIC
