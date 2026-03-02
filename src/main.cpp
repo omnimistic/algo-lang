@@ -295,6 +295,24 @@ void executeLine(string line, int& i, const vector<string>& Buffer) {
             if (!restOfLine.empty()) {
                 executeLine(restOfLine, i, Buffer);
             }
+            //skipping else if condition is true
+            if (i + 1 < (int)Buffer.size()) {
+                string nextLine = trim(Buffer[i + 1]);
+                if (nextLine.length() >= 4 && nextLine.substr(0, 4) == "ELSE") {
+                    i++; 
+                }
+            }
+        } else {
+            if (i + 1 < (int)Buffer.size()) {
+                string nextLine = trim(Buffer[i + 1]);
+                if (nextLine.length() >= 4 && nextLine.substr(0, 4) == "ELSE") {
+                    i++;
+                    string elseBranch = trim(nextLine.substr(4));
+                    if (!elseBranch.empty()) {
+                        executeLine(elseBranch, i, Buffer);
+                    }
+                }
+            }
         }
     }
     else {
