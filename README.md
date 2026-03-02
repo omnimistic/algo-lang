@@ -11,10 +11,11 @@ actual image of an algorithm i wrote in class (ignore my handwriting, i was dist
 * **START** - defines where the program starts
 * **END** - defines where the program stops executing
 * **DECLARE** - used to declare variables
-* **GOTO** - start interpreting from a specific line
-* **IF** - if conditional
-* **OUTPUT** - output variable, integer, strings
 * **INPUT** - input integers, floats and strings
+* **OUTPUT** - output variable, integer, strings
+* **GOTO** - start interpreting from a specific line
+* **IF** / **ELIF** / **ELSE** - conditional branching (supports both inline checks and multi-line blocks using **ENDIF**, **ENDELIF**, and **ENDELSE**)
+* **WHILE** / **ENDWHILE** - native loop blocks so you don't have to build them manually with GOTO
 
 oh and i also got dynamic variable allocation working which was pretty cool to make. you just type an input and the interpreter decides on its own what kind of input it is and stores it in that variable. pretty cool right?
 
@@ -44,6 +45,7 @@ i = i + 1
 GOTO 5
 END
 
+
 ```
 
 **Output:**
@@ -57,6 +59,7 @@ Enter value for n: 10
 >> 7
 
 E:\AlgoLang>
+
 
 ```
 
@@ -74,7 +77,6 @@ i = i + 1
 GOTO 6
 OUTPUT fact
 END
-
 ```
 
 **Output:**
@@ -86,7 +88,61 @@ Enter value for n: 5
 
 E:\AlgoLang>
 
+
 ```
+
+### Number Analyzer
+```text
+START
+DECLARE num, loops
+loops = 0
+OUTPUT "Welcome to the Number Analyzer."
+
+//while loop to get 3 numbers and analyze them
+WHILE loops < 3
+    OUTPUT "Please enter a number:"
+    INPUT num
+    IF num > 0
+        OUTPUT "That is a POSITIVE number."
+    ENDIF
+    ELIF num < 0
+        OUTPUT "That is a NEGATIVE number."
+    ENDELIF
+    ELSE
+        OUTPUT "That is exactly ZERO."
+    ENDELSE
+    
+    loops = loops + 1
+ENDWHILE
+//this ENDWHILE tells the interpreter that anything
+ between WHILE and this falls under WHILE. it acts like {} of modern languages
+
+OUTPUT "Analysis finished. Goodbye!"
+END
+```
+
+**Output:**
+
+```cmd
+E:\AlgoLang>algo.exe ./example_code/number_analyzer.txt
+>> Welcome to the Number Analyzer.
+>> Please enter a number:
+Enter value for num: 42
+>> That is a POSITIVE number.
+>> Please enter a number:
+Enter value for num: -7
+>> That is a NEGATIVE number.
+>> Please enter a number:
+Enter value for num: 0
+>> That is exactly ZERO.
+>> Analysis finished. Goodbye!
+
+E:\AlgoLang>
+```
+
+### NOTICE how the Number Analyzer code is written differently
+
+The Number Analyzer showcases AlgoLang’s move toward modern, structured programming. By replacing manual GOTO jumps with WHILE and IF/ELIF/ELSE blocks, the script no longer relies on fragile line-counting; instead, the engine "scans" for matching END tags to skip or repeat code sections automatically. This makes the code much more resilient—you can add blank lines or comments anywhere without breaking the logic. While our trim() function filters out messy spaces and tabs to keep the parser happy, the absolute "address" of a line is now irrelevant for this modern style. As long as your blocks are properly closed, the engine handles the navigation, letting you focus on the algorithm rather than the math of the line numbers. You can still use GOTO and stuff along with these new additions, we have kept that compatibility.
 
 ---
 
@@ -95,20 +151,21 @@ E:\AlgoLang>
 To write and run your own algorithms using AlgoLang:
 
 1. Clone the repository to your local machine:
+
 ```bash
 git clone https://github.com/omnimistic/algo-lang.git
-```
 
+```
 
 2. Navigate to the project directory.
 3. Write your algorithm in a `.txt` file using the keywords above and make sure to only use one keyword per line unless its an if statement. Also as you might have noticed the line number matters. So keep that in mind.
 4. Run the executable, passing your file path as an argument:
+
 ```cmd
 algo.exe ./path/to/your/file.txt
 
+
 ```
-
-
 
 ---
 
@@ -116,9 +173,8 @@ algo.exe ./path/to/your/file.txt
 
 well thats about it. idk if i am gonna work on this anymore but yall are free to contribute to it. its a simple project so will be good for new programmers instead of jumping into a complex repo.
 
-If you want to add new keywords, improve the parser, or fix bugs:
+AlgoLang is a community project! If you want to help make it a "real" language, please check out our [Contributing Guidelines](CONTRIBUTING.md) for a list of to-dos and rules for submitting Pull Requests.
 
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature-new-keyword`).
-3. Make your changes and commit them.
-4. Push to your fork and submit a Pull Request!
+## License
+
+This project is licensed under the [MIT LICENSE](LICENSE) - see the LICENSE file for details.
