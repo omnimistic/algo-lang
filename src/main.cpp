@@ -47,7 +47,7 @@ float getValue(const string& token) {
         return stof(token);
     } else {
         if (checkVarExists(token)) return variables[token].f_val;
-        return 0.0f; 
+        return 0.0f;
     }
 }
 
@@ -98,7 +98,7 @@ float doMaths(const string& expression) {
                 return sign * variables[token].f_val;
             }
         }
-        
+
         //handles multiplication, division, and modulus
         //makes sure these happen before addition or subtraction.
         float parseTerm(const string& str, size_t& pos) {
@@ -106,13 +106,13 @@ float doMaths(const string& expression) {
             while (true) {
                 skipWhitespace(str, pos);
                 if (pos >= str.length()) break;
-                
+
                 char op = str[pos];
                 if (op != '*' && op != '/' && op != '%') break;
-                
+
                 pos++;
                 float nextVal = parseFactor(str, pos);
-                
+
                 if (op == '*') val *= nextVal;
                 else if (op == '/') {
                     if (nextVal != 0.0f) val /= nextVal;
@@ -126,7 +126,7 @@ float doMaths(const string& expression) {
             }
             return val;
         }
-        
+
         //handles addition and subtraction.
         //starting funciton of the parser
         float parseExpression(const string& str, size_t& pos) {
@@ -134,13 +134,13 @@ float doMaths(const string& expression) {
             while (true) {
                 skipWhitespace(str, pos);
                 if (pos >= str.length()) break;
-                
+
                 char op = str[pos];
                 if (op != '+' && op != '-') break;
-                
+
                 pos++;
                 float nextVal = parseTerm(str, pos);
-                
+
                 if (op == '+') val += nextVal;
                 else if (op == '-') val -= nextVal;
             }
@@ -160,11 +160,11 @@ int findBlockEnd(int startIndex, const vector<string>& Buffer, string startCmd, 
     for (int i = startIndex + 1; i < Buffer.size(); i++) {
         string currentLine = trim(Buffer[i]);
         if (currentLine.empty() || (currentLine.length() >= 2 && currentLine.substr(0, 2) == "//")) continue;
-        
+
         stringstream ss(currentLine);
         string command;
         ss >> command;
-        
+
         if (command == startCmd) count++;
         else if (command == endCmd) {
             count--;
@@ -179,11 +179,11 @@ int findEndWhile(int startIndex, const vector<string>& Buffer) {
     for (int i = startIndex + 1; i < Buffer.size(); i++) {
         string currentLine = trim(Buffer[i]);
         if (currentLine.empty() || (currentLine.length() >= 2 && currentLine.substr(0, 2) == "//")) continue;
-        
+
         stringstream ss(currentLine);
         string command;
         ss >> command;
-        
+
         if (command == "WHILE") whileCount++;
         else if (command == "ENDWHILE") {
             whileCount--;
@@ -198,11 +198,11 @@ int findWhile(int startIndex, const vector<string>& Buffer) {
     for (int i = startIndex - 1; i >= 0; i--) {
         string currentLine = trim(Buffer[i]);
         if (currentLine.empty() || (currentLine.length() >= 2 && currentLine.substr(0, 2) == "//")) continue;
-        
+
         stringstream ss(currentLine);
         string command;
         ss >> command;
-        
+
         if (command == "ENDWHILE") whileCount++;
         else if (command == "WHILE") {
             whileCount--;
@@ -217,10 +217,10 @@ void executeLine(string line, int& i, const vector<string>& Buffer) {
     stringstream ss(line);
     string command;
     ss >> command;
-    
+
     //if the line starts with //, completely ignore it and stop processing
     if (command.length() >= 2 && command.substr(0, 2) == "//") {
-        return; 
+        return;
     }
 
     if (command == "END") {
@@ -264,13 +264,13 @@ void executeLine(string line, int& i, const vector<string>& Buffer) {
         else if (rawInput.find('.') != string::npos) {
             newVal.type = TYPE_FLOAT;
             try { newVal.f_val = stof(rawInput); } catch(...) { newVal.f_val = 0.0f; }
-            newVal.i_val = (int)newVal.f_val; 
+            newVal.i_val = static_cast<int>(newVal.f_val);
         }
         //otherwise assumes its an integer
         else {
             newVal.type = TYPE_INT;
             try { newVal.i_val = stoi(rawInput); } catch(...) { newVal.i_val = 0; }
-            newVal.f_val = (float)newVal.i_val; 
+            newVal.f_val = static_cast<float>(newVal.i_val);
         }
         //save it to map
         variables[varName] = newVal;
@@ -278,7 +278,7 @@ void executeLine(string line, int& i, const vector<string>& Buffer) {
     else if (command == "OUTPUT") {
         string restOfLine;
         getline(ss, restOfLine);
-        restOfLine = trim(restOfLine); 
+        restOfLine = trim(restOfLine);
 
         if (restOfLine.empty()) return;
 
@@ -337,12 +337,12 @@ void executeLine(string line, int& i, const vector<string>& Buffer) {
             string restOfLine;
             getline(ss, restOfLine);
             restOfLine = trim(restOfLine);
-            
+
             if (!restOfLine.empty()) executeLine(restOfLine, i, Buffer);
         } else {
             previousIfBranchExecuted = false;
             int endIdx = findBlockEnd(i, Buffer, "IF", "ENDIF");
-            if (endIdx != -1) i = endIdx; 
+            if (endIdx != -1) i = endIdx;
         }
     }
     else if (command == "ELIF") {
@@ -351,7 +351,7 @@ void executeLine(string line, int& i, const vector<string>& Buffer) {
             if (endIdx != -1) i = endIdx;
             return;
         }
-        
+
         string leftSide, op, rightSide;
         ss >> leftSide >> op >> rightSide;
 
@@ -375,11 +375,11 @@ void executeLine(string line, int& i, const vector<string>& Buffer) {
             string restOfLine;
             getline(ss, restOfLine);
             restOfLine = trim(restOfLine);
-            
+
             if (!restOfLine.empty()) executeLine(restOfLine, i, Buffer);
         } else {
             int endIdx = findBlockEnd(i, Buffer, "ELIF", "ENDELIF");
-            if (endIdx != -1) i = endIdx; 
+            if (endIdx != -1) i = endIdx;
         }
     }
     else if (command == "ELSE") {
@@ -388,29 +388,29 @@ void executeLine(string line, int& i, const vector<string>& Buffer) {
             if (endIdx != -1) i = endIdx;
             return;
         }
-        
+
         previousIfBranchExecuted = true;
         string restOfLine;
         getline(ss, restOfLine);
         restOfLine = trim(restOfLine);
-        
+
         if (!restOfLine.empty()) executeLine(restOfLine, i, Buffer);
     }
     else if (command == "ENDIF" || command == "ENDELIF" || command == "ENDELSE") {
-        return; 
+        return;
     }
     else if (command == "WHILE") {
         string leftSide, op, rightSide;
         ss >> leftSide >> op >> rightSide;
-        
+
         if (op != "==" && op != "!=" && op != "<" && op != ">" && op != "<=" && op != ">=") {
             cout << "Error: Unknown operator '" << op << "' in WHILE statement!" << endl;
             return;
         }
-        
+
         float leftVal = getValue(leftSide);
         float rightVal = getValue(rightSide);
-        
+
         bool conditionMet = false;
         if (op == "==") conditionMet = (leftVal == rightVal);
         else if (op == "!=") conditionMet = (leftVal != rightVal);
@@ -418,11 +418,11 @@ void executeLine(string line, int& i, const vector<string>& Buffer) {
         else if (op == ">") conditionMet = (leftVal > rightVal);
         else if (op == "<=") conditionMet = (leftVal <= rightVal);
         else if (op == ">=") conditionMet = (leftVal >= rightVal);
-        
+
         if (!conditionMet) {
             int endIdx = findEndWhile(i, Buffer);
             if (endIdx != -1) {
-                i = endIdx; 
+                i = endIdx;
             } else {
                 cout << "Error: Missing ENDWHILE for WHILE!" << endl;
                 isRunning = false;
@@ -432,7 +432,7 @@ void executeLine(string line, int& i, const vector<string>& Buffer) {
     else if (command == "ENDWHILE") {
         int startIdx = findWhile(i, Buffer);
         if (startIdx != -1) {
-            i = startIdx - 1; 
+            i = startIdx - 1;
         } else {
             cout << "Error: Missing WHILE for ENDWHILE!" << endl;
             isRunning = false;
@@ -450,13 +450,13 @@ void executeLine(string line, int& i, const vector<string>& Buffer) {
             string expression;
             //take the mathematical expression and pass it to doMaths
             getline(ss, expression);
-            
-            float result = doMaths(expression);
-            
-            variables[targetVar].f_val = result;
-            variables[targetVar].i_val = (int)result;
 
-            if (result == (int)result) variables[targetVar].type = TYPE_INT;
+            float result = doMaths(expression);
+
+            variables[targetVar].f_val = result;
+            variables[targetVar].i_val = static_cast<int>(result);
+
+            if (result == static_cast<float>(result)) variables[targetVar].type = TYPE_INT;
             else variables[targetVar].type = TYPE_FLOAT;
         }
     }
@@ -467,7 +467,7 @@ int main(int argc, char* argv[]) {
         cerr << "Usage: algo <filename>" << endl;
         return 1;
     }
-    
+
     //opens the file
     string filename = argv[1];
     ifstream file(filename);
@@ -486,13 +486,13 @@ int main(int argc, char* argv[]) {
     }
     //we stop using the file as we already have all the code in the buffer
     file.close();
-    
+
     //code execution loop
     for(int i = 0; i < Buffer.size(); ++i){
         //access current line from buffer and skip if blank
         string currentLine = trim(Buffer[i]);
         if(currentLine.empty()) continue;
-        
+
         //tokenizer
         stringstream ss(currentLine);
         string command;
@@ -500,7 +500,7 @@ int main(int argc, char* argv[]) {
 
         //check for start and end points
         if (command == "START") {
-            isRunning = true; 
+            isRunning = true;
             continue;
         }
 
