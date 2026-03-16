@@ -1,4 +1,5 @@
 #pragma once
+#include "common.hpp"
 
 //generic block finder for IF, ELIF, and ELSE
 int findBlockEnd(int startIndex, const vector<string>& Buffer, string startCmd, string endCmd);

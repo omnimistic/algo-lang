@@ -1,14 +1,16 @@
 #include "execute.hpp"
+#include "utils.hpp"
+
+using namespace std;
 
 float doMaths(const string& expression) {
     //instantiate the local parser and do the calculation
-    Parser p;
     size_t pos = 0;
-    return p.parseExpression(expression, pos);
+    return parseExpression(expression, pos);
 }
 
 //engine that processes a single line, moved here so IF can call it recursively
-void executeLine(string line, int& i, const vector<string>& Buffer) {
+void executeLine(string line, int& i, const vector<string>& Buffer, map<string, varValue>* variables) {
     stringstream ss(line);
     string command;
     ss >> command;
@@ -30,10 +32,10 @@ void executeLine(string line, int& i, const vector<string>& Buffer) {
         while (getline(declStream, varName, ',')) {
             varName = trim(varName);
             if (!varName.empty()) {
-                if (variables.count(varName) > 0) {
+                if (variables->count(varName) > 0) {
                     cout << "Error: Variable '" << varName << "' already declared!" << endl;
                 } else {
-                    variables[varName] = varValue();
+                    *variables[varName] = varValue();
                 }
             }
         }

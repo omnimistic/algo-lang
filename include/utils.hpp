@@ -1,4 +1,5 @@
 #pragma once
+#include "common.hpp"
 
 //removes leading and trailing spaces from a string
 //scans for the first and last actual characters, then extracts only that portion.

@@ -1,4 +1,5 @@
 #pragma once
+#include "common.hpp"
 
 float doMaths(const string& expression);
 

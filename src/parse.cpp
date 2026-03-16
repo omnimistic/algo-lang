@@ -1,16 +1,18 @@
 #include "parse.hpp"
+#include "utils.hpp"
+
+using namespace std;
 
 //moves the pointer forward to ignore spaces and tabs
 void skipWhitespace(const string& str, size_t& pos) {
   while (pos < str.length() && isspace(str[pos])) {
     pos++;
-
   }
 }
 
 //reads a word, if digit, converts to float, if letters, pulls the value from variables map
 //also handles negative sign and restarts if it sees ( ).
-float parseFactor(const string& str, size_t& pos) {
+float parseFactor(const string& str, size_t& pos, map<string, varValue>* variables) {
   skipWhitespace(str, pos);
   if (pos >= str.length()) return 0.0f;
 
@@ -40,7 +42,7 @@ float parseFactor(const string& str, size_t& pos) {
     return sign * stof(token);
   } else {
     if (!checkVarExists(token)) return 0.0f;
-    return sign * variables[token].f_val;
+    return sign * variables[token]->f_val;
   }
 }
         

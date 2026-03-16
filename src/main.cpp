@@ -1,11 +1,5 @@
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <map>
-#include <cctype>
-#include <cmath>
+#include "utils.hpp"
+#include "execute.hpp"
 
 using namespace std;
 

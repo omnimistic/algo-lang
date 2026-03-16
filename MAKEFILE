@@ -2,15 +2,15 @@ compiler = g++
 
 compile_flags = -Wall -Werror -Wpedantic
 
-build_dir = build/
-include_dir = include/
-src_dir = src/
+build_dir = build
+include_dir = include
+src_dir = src
 
-src_files = $(wildcard: $(src-dir)/*.c)
+src_files = $(wildcard $(src_dir)/*.cpp)
 target = algo_lang
 
 $(build_dir)/$(target):
-	$(compiler) $(compile_flags) $(src_files) -o $@
+	$(compiler) $(compile_flags) -I$(include_dir) $(src_files) -o $@
 
 clean:
 	rm -rf $(build_dir)

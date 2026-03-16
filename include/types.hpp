@@ -1,4 +1,5 @@
 #pragma once
+#include "common.hpp"
 
 enum DataType { TYPE_INT, TYPE_FLOAT, TYPE_STRING };
 

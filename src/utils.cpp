@@ -1,5 +1,7 @@
 #include "utils.hpp"
 
+using namespace std;
+
 //removes leading and trailing spaces from a string
 //scans for the first and last actual characters, then extracts only that portion.
 string trim(const string& str) {
