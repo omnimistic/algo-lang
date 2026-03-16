@@ -1,0 +1,24 @@
+compiler = g++
+
+compile_flags = -Wall -Werror -Wpedantic
+
+build_dir = build
+include_dir = include
+src_dir = src
+
+src_files = $(wildcard $(src_dir)/*.cpp)
+
+ifeq ($(OS), Windows_NT)
+target = algo_lang.exe
+else
+target = algo_lang
+endif
+
+$(build_dir)/$(target):
+	mkdir -p $(build_dir)
+	$(compiler) $(compile_flags) -I$(include_dir) $(src_files) -o $@
+
+clean:
+	rm -rf $(build_dir)
+
+.PHONY: $(build_dir)/$(target) clean
