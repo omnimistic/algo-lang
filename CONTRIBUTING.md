@@ -23,16 +23,17 @@ We have a list of features we want to add to make AlgoLang a "real" language:
 ## The Contribution Process
 
 1. **Fork** the repository and create your branch from `main`.
-2. **Implement** your changes in `main.cpp`.
+2. **Implement** your changes in the appropriate files within the `src/` and `include/` directories. (e.g., math logic goes in `parse.cpp`, command execution goes in `execute.cpp`).
 3. **Comment** your code. Try to keep the style consistent with the current "low-level" explanation style.
-4. **CRITICAL: Test Your Changes!** - Before submitting a Pull Request, you **must** run every script in the `/example_code` folder.
+4. **Compile** your changes using the provided Makefile by running `make` in your terminal.
+5. **CRITICAL: Test Your Changes!** - Before submitting a Pull Request, you **must** run every script in the `/example_code` folder.
    - If your changes break the legacy `GOTO` examples or the modern `WHILE` blocks, please fix them before submitting.
-5. **Open a Pull Request** with a clear description of what you added or fixed.
+6. **Open a Pull Request** with a clear description of what you added or fixed.
 
 ## Coding Standards
 
 - **Keep it Simple**: AlgoLang is an educational tool. Avoid overly complex C++ templates if a simple loop or conditional works.
-- **Stay Lightweight**: We want the interpreter to be fast and contained within a single `main.cpp` for as long as possible.
+- **Maintain Structure**: Since we use a multi-file architecture, please ensure new functions and variables are placed in their correct modules rather than dumping everything in one file.
 - **Don't break the parser**: Ensure that the `doMaths` function (BODMAS/PEMDAS) still works after your changes.
 
 ## Bug Reports
