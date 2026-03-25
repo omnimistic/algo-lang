@@ -110,30 +110,12 @@ void executeLine(string line, int& i, const vector<string>& Buffer, map<string, 
         } else cout << "Error: Line " << targetLine << " does not exist!" << endl;
     }
     else if (command == "IF") {
-        string leftSide, op, rightSide;
-        ss >> leftSide >> op >> rightSide;
-
-        float leftVal = getValue(leftSide, variables);
-        float rightVal = getValue(rightSide, variables);
-
-        bool conditionMet = false;
-        if (op == "==") conditionMet = (leftVal == rightVal);
-        else if (op == "!=") conditionMet = (leftVal != rightVal);
-        else if (op == "<") conditionMet = (leftVal < rightVal);
-        else if (op == ">") conditionMet = (leftVal > rightVal);
-        else if (op == "<=") conditionMet = (leftVal <= rightVal);
-        else if (op == ">=") conditionMet = (leftVal >= rightVal);
-        else {
-            cout << "Error: Unknown operator '" << op << "' in IF statement!" << endl;
-            return;
-        }
-
+        bool conditionMet = parseBooleanConditions(ss,variables);
         if (conditionMet) {
             *previousIfBranchExecuted = true;
             string restOfLine;
             getline(ss, restOfLine);
             restOfLine = trim(restOfLine);
-            
             if (!restOfLine.empty()) executeLine(restOfLine, i, Buffer, variables, previousIfBranchExecuted, isRunning);
         } else {
             *previousIfBranchExecuted = false;

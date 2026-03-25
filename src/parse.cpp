@@ -1,5 +1,4 @@
 #include "parse.hpp"
-
 using namespace std;
 
 //moves the pointer forward to ignore spaces and tabs
@@ -91,4 +90,66 @@ float parseExpression(const string& str, size_t& pos, map<string, varValue>* var
     else if (op == '-') val -= nextVal;
   }
   return val;
+}
+//helper function to evaluate condition inside if statement
+bool parseComparisionConditions(string& conditionalStatement, map<string, varValue>* variables){
+    stringstream ss(conditionalStatement);
+    string leftSide, op, rightSide;
+    ss >> leftSide >> op >> rightSide;
+    float leftVal = getValue(leftSide, variables);
+    float rightVal = getValue(rightSide, variables);
+
+    bool conditionMet = false;
+    if (op == "==") conditionMet = (leftVal == rightVal);
+    else if (op == "!=") conditionMet = (leftVal != rightVal);
+    else if (op == "<") conditionMet = (leftVal < rightVal);
+    else if (op == ">") conditionMet = (leftVal > rightVal);
+    else if (op == "<=") conditionMet = (leftVal <= rightVal);
+    else if (op == ">=") conditionMet = (leftVal >= rightVal);
+    else {
+        cout << "Error: Unknown operator '" << op << "' in IF statement!" << endl;
+        return;
+    }
+    return conditionMet;
+}
+bool parseBooleanConditions(stringstream& nestedConditionalStatement, map<string, varValue>* variables) {
+    
+  vector<string> parts = separateThestringstream(nestedConditionalStatement);
+  vector<string> temp;
+
+  // PASS 1: AND / XOR
+  for (int i = 0; i < parts.size(); i++) {
+      string token = parts[i];
+
+      if (token == "and" || token == "xor") {
+
+          if (temp.empty()) return false;
+
+          bool left = parseComparisionConditions(temp.back(), variables);
+          temp.pop_back();
+
+          bool right = parseComparisionConditions(parts[i + 1], variables);
+          i++;
+
+          bool result = (token == "and") ? (left && right) : (left ^ right);
+
+          temp.push_back(result ? "true" : "false");
+      } else {
+          temp.push_back(token);
+      }
+  }
+
+  // PASS 2: OR
+  bool result = parseComparisionConditions(temp[0], variables);
+
+  for (int i = 1; i < temp.size(); i += 2) {
+      string op = temp[i];
+      bool right = parseComparisionConditions(temp[i + 1], variables);
+
+      if (op == "or") {
+          result = result || right;
+      }
+  }
+
+  return result;
 }
