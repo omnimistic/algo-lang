@@ -17,6 +17,11 @@ actual image of an algorithm i wrote in class (ignore my handwriting, i was dist
 * **IF** / **ELIF** / **ELSE** - conditional branching (supports both inline checks and multi-line blocks using **ENDIF**, **ENDELIF**, and **ENDELSE**)
 * **WHILE** / **ENDWHILE** - native loop blocks so you don't have to build them manually with GOTO
 
+Boolean logic inside IF/ELIF supports **and**, **or**, and **xor** with fixed precedence rules:
+- **and/xor** are evaluated before **or**
+- operators at the same precedence are evaluated left-to-right
+- bracket/parenthesis grouping in IF/ELIF conditions is intentionally **not** supported
+
 oh and i also got dynamic variable allocation working which was pretty cool to make. you just type an input and the interpreter decides on its own what kind of input it is and stores it in that variable. pretty cool right?
 
 ---
@@ -90,7 +95,52 @@ E:\AlgoLang>
 
 
 ```
+# if while boolean logic check
+```
+START
+DECLARE i
 
+i = 0
+
+OUTPUT "Boolean IF + WHILE demo"
+
+// WHILE contains and/or/xor but still behaves like i < 5
+WHILE i < 5 and 1 == 1 or 1 == 0 xor 1 == 0
+    OUTPUT "Inside loop"
+
+    // IF also uses and/or/xor
+    IF i < 2 and 2 == 2 xor 1 == 0
+        OUTPUT "IF branch (xor involved)"
+    ENDIF
+    ELIF i >= 2 and i < 4 or 0 == 1
+        OUTPUT "ELIF branch (and/or involved)"
+    ENDELIF
+    ELSE
+        OUTPUT "ELSE branch"
+    ENDELSE
+
+    i = i + 1
+ENDWHILE
+
+OUTPUT "Loop ended"
+END
+```
+**Output:**
+
+```cmd
+Boolean IF + WHILE demo
+>> Inside loop
+>> IF branch (xor involved)
+>> Inside loop
+>> IF branch (xor involved)
+>> Inside loop
+>> ELIF branch (and/or involved)
+>> Inside loop
+>> ELIF branch (and/or involved)
+>> Inside loop
+>> ELSE branch
+>> Loop ended
+```
 ### Number Analyzer
 ```text
 START

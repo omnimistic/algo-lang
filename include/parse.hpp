@@ -19,3 +19,9 @@ float parseTerm(const string& str, size_t& pos, map<string, varValue>* variables
 //handles addition and subtraction.
 //starting funciton of the parser
 float parseExpression(const string& str, size_t& pos, map<string, varValue>* variables);
+
+
+//helper function to evaluate boolean condition inside if statement
+bool parseBooleanConditions(stringstream& nestedConditionalStatement, map<string, varValue>* variables);
+//helper function to evaluate comparision condition inside if statement
+bool parseComparisionConditions(const string& conditionalStatement, map<string, varValue>* variables);

@@ -10,3 +10,6 @@ bool checkVarExists(const string& varName, map<string, varValue>* variables);
 
 //helper function to evaluate a raw number or pull a variable's value for the IF statement
 float getValue(const string& token, map<string, varValue>* variables);
+
+//helper function to separate the stringstream in vector<string> array
+vector<string> separateThestringstream(stringstream& nestedConditionalStatement);
