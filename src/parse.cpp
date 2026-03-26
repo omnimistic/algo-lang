@@ -4,13 +4,14 @@
 #include <cstdlib>
 
 using namespace std;
-
+//page level functions
 namespace {
+  //error catcher function
 [[noreturn]] void failConditionalParse(const string& message) {
   cout << "Error: " << message << endl;
   exit(1);
 }
-
+//thing to verify the boolean token
 bool isBooleanOperatorToken(const string& token) {
   string normalized = token;
   transform(normalized.begin(), normalized.end(), normalized.begin(), ::tolower);
@@ -108,7 +109,7 @@ float parseExpression(const string& str, size_t& pos, map<string, varValue>* var
   }
   return val;
 }
-//helper function to evaluate condition inside if statement
+//function to evaluate comparative condition inside if/elif and while statement
 bool parseComparisionConditions(const string& conditionalStatement, map<string, varValue>* variables){
   string normalized = trim(conditionalStatement);
   string lowered = normalized;
@@ -138,6 +139,7 @@ bool parseComparisionConditions(const string& conditionalStatement, map<string, 
     }
     return conditionMet;
 }
+//function to evaluate boolean conditions inside if/elif and while statement
 bool parseBooleanConditions(stringstream& nestedConditionalStatement, map<string, varValue>* variables) {
     
   vector<string> parts = separateThestringstream(nestedConditionalStatement);

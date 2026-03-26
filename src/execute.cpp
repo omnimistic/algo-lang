@@ -4,12 +4,13 @@
 #include <cstdlib>
 
 using namespace std;
-
+//page level functions
 namespace {
+//thing to verify the comparative token
 bool isComparisonOperator(const string& token) {
     return token == "==" || token == "!=" || token == "<" || token == ">" || token == "<=" || token == ">=";
 }
-
+//thing to verify the boolean token
 bool isBooleanOperator(const string& token) {
     string normalized = token;
     transform(normalized.begin(), normalized.end(), normalized.begin(), ::tolower);
@@ -24,7 +25,7 @@ string joinTokens(const vector<string>& tokens, size_t start, size_t endExclusiv
     }
     return joined;
 }
-
+//thing to check if the statements are valid or not
 bool splitConditionAndInlineCommand(const string& rawConditionAndRest, string* conditionText, string* inlineCommand) {
     vector<string> tokens;
     string token;
