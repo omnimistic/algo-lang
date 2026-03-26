@@ -1,0 +1,27 @@
+START
+DECLARE i
+
+i = 0
+
+OUTPUT "Boolean IF + WHILE demo"
+
+// WHILE contains and/or/xor but still behaves like i < 5
+WHILE i < 5 and 1 == 1 or 1 == 0 xor 1 == 0
+    OUTPUT "Inside loop"
+
+    // IF also uses and/or/xor
+    IF i < 2 and 2 == 2 xor 1 == 0
+        OUTPUT "IF branch (xor involved)"
+    ENDIF
+    ELIF i >= 2 and i < 4 or 0 == 1
+        OUTPUT "ELIF branch (and/or involved)"
+    ENDELIF
+    ELSE
+        OUTPUT "ELSE branch"
+    ENDELSE
+
+    i = i + 1
+ENDWHILE
+
+OUTPUT "Loop ended"
+END

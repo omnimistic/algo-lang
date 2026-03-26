@@ -1,6 +1,56 @@
 #include "execute.hpp"
 
+#include <algorithm>
+#include <cstdlib>
+
 using namespace std;
+
+namespace {
+bool isComparisonOperator(const string& token) {
+    return token == "==" || token == "!=" || token == "<" || token == ">" || token == "<=" || token == ">=";
+}
+
+bool isBooleanOperator(const string& token) {
+    string normalized = token;
+    transform(normalized.begin(), normalized.end(), normalized.begin(), ::tolower);
+    return normalized == "and" || normalized == "or" || normalized == "xor";
+}
+
+string joinTokens(const vector<string>& tokens, size_t start, size_t endExclusive) {
+    string joined;
+    for (size_t i = start; i < endExclusive; ++i) {
+        if (!joined.empty()) joined += " ";
+        joined += tokens[i];
+    }
+    return joined;
+}
+
+bool splitConditionAndInlineCommand(const string& rawConditionAndRest, string* conditionText, string* inlineCommand) {
+    vector<string> tokens;
+    string token;
+    stringstream tokenStream(rawConditionAndRest);
+
+    while (tokenStream >> token) {
+        tokens.push_back(token);
+    }
+
+    if (tokens.size() < 3 || !isComparisonOperator(tokens[1])) {
+        return false;
+    }
+
+    size_t idx = 3;
+    while (idx < tokens.size() && isBooleanOperator(tokens[idx])) {
+        if (idx + 3 >= tokens.size() || !isComparisonOperator(tokens[idx + 2])) {
+            return false;
+        }
+        idx += 4;
+    }
+
+    *conditionText = joinTokens(tokens, 0, idx);
+    *inlineCommand = joinTokens(tokens, idx, tokens.size());
+    return true;
+}
+}
 
 float doMaths(const string& expression, map<string, varValue>* variables) {
     //instantiate the local parser and do the calculation
@@ -103,20 +153,29 @@ void executeLine(string line, int& i, const vector<string>& Buffer, map<string, 
         int targetLine;
         ss >> targetLine;
         //make sure the line exists in Buffer
-        if (targetLine > 0 && targetLine <= Buffer.size()) {
+        if (targetLine > 0 && static_cast<size_t>(targetLine) <= Buffer.size()) {
             //fun trick here, target line - 1 to adjust for 0 index and
             //then another -1 so that the ++i of loop runs the actual line required
             i = targetLine - 2;
         } else cout << "Error: Line " << targetLine << " does not exist!" << endl;
     }
     else if (command == "IF") {
-        bool conditionMet = parseBooleanConditions(ss,variables);
+        string conditionAndInline;
+        getline(ss, conditionAndInline);
+        conditionAndInline = trim(conditionAndInline);
+
+        string conditionText;
+        string inlineCommand;
+        if (!splitConditionAndInlineCommand(conditionAndInline, &conditionText, &inlineCommand)) {
+            cout << "Error: Malformed IF condition!" << endl;
+            exit(1);
+        }
+
+        stringstream conditionStream(conditionText);
+        bool conditionMet = parseBooleanConditions(conditionStream, variables);
         if (conditionMet) {
             *previousIfBranchExecuted = true;
-            string restOfLine;
-            getline(ss, restOfLine);
-            restOfLine = trim(restOfLine);
-            if (!restOfLine.empty()) executeLine(restOfLine, i, Buffer, variables, previousIfBranchExecuted, isRunning);
+            if (!inlineCommand.empty()) executeLine(inlineCommand, i, Buffer, variables, previousIfBranchExecuted, isRunning);
         } else {
             *previousIfBranchExecuted = false;
             int endIdx = findBlockEnd(i, Buffer, "IF", "ENDIF");
@@ -129,32 +188,24 @@ void executeLine(string line, int& i, const vector<string>& Buffer, map<string, 
             if (endIdx != -1) i = endIdx;
             return;
         }
-        
-        string leftSide, op, rightSide;
-        ss >> leftSide >> op >> rightSide;
 
-        float leftVal = getValue(leftSide, variables);
-        float rightVal = getValue(rightSide, variables);
+        string conditionAndInline;
+        getline(ss, conditionAndInline);
+        conditionAndInline = trim(conditionAndInline);
 
-        bool conditionMet = false;
-        if (op == "==") conditionMet = (leftVal == rightVal);
-        else if (op == "!=") conditionMet = (leftVal != rightVal);
-        else if (op == "<") conditionMet = (leftVal < rightVal);
-        else if (op == ">") conditionMet = (leftVal > rightVal);
-        else if (op == "<=") conditionMet = (leftVal <= rightVal);
-        else if (op == ">=") conditionMet = (leftVal >= rightVal);
-        else {
-            cout << "Error: Unknown operator '" << op << "' in ELIF statement!" << endl;
-            return;
+        string conditionText;
+        string inlineCommand;
+        if (!splitConditionAndInlineCommand(conditionAndInline, &conditionText, &inlineCommand)) {
+            cout << "Error: Malformed ELIF condition!" << endl;
+            exit(1);
         }
+
+        stringstream conditionStream(conditionText);
+        bool conditionMet = parseBooleanConditions(conditionStream, variables);
 
         if (conditionMet) {
             *previousIfBranchExecuted = true;
-            string restOfLine;
-            getline(ss, restOfLine);
-            restOfLine = trim(restOfLine);
-            
-            if (!restOfLine.empty()) executeLine(restOfLine, i, Buffer, variables, previousIfBranchExecuted, isRunning);
+            if (!inlineCommand.empty()) executeLine(inlineCommand, i, Buffer, variables, previousIfBranchExecuted, isRunning);
         } else {
             int endIdx = findBlockEnd(i, Buffer, "ELIF", "ENDELIF");
             if (endIdx != -1) i = endIdx; 
@@ -178,24 +229,19 @@ void executeLine(string line, int& i, const vector<string>& Buffer, map<string, 
         return; 
     }
     else if (command == "WHILE") {
-        string leftSide, op, rightSide;
-        ss >> leftSide >> op >> rightSide;
-        
-        if (op != "==" && op != "!=" && op != "<" && op != ">" && op != "<=" && op != ">=") {
-            cout << "Error: Unknown operator '" << op << "' in WHILE statement!" << endl;
-            return;
+        string conditionAndInline;
+        getline(ss, conditionAndInline);
+        conditionAndInline = trim(conditionAndInline);
+
+        string conditionText;
+        string inlineCommand;
+        if (!splitConditionAndInlineCommand(conditionAndInline, &conditionText, &inlineCommand) || !inlineCommand.empty()) {
+            cout << "Error: Malformed WHILE condition!" << endl;
+            exit(1);
         }
-        
-        float leftVal = getValue(leftSide, variables);
-        float rightVal = getValue(rightSide, variables);
-        
-        bool conditionMet = false;
-        if (op == "==") conditionMet = (leftVal == rightVal);
-        else if (op == "!=") conditionMet = (leftVal != rightVal);
-        else if (op == "<") conditionMet = (leftVal < rightVal);
-        else if (op == ">") conditionMet = (leftVal > rightVal);
-        else if (op == "<=") conditionMet = (leftVal <= rightVal);
-        else if (op == ">=") conditionMet = (leftVal >= rightVal);
+
+        stringstream conditionStream(conditionText);
+        bool conditionMet = parseBooleanConditions(conditionStream, variables);
         
         if (!conditionMet) {
             int endIdx = findEndWhile(i, Buffer);

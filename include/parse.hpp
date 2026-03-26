@@ -24,4 +24,4 @@ float parseExpression(const string& str, size_t& pos, map<string, varValue>* var
 //helper function to evaluate boolean condition inside if statement
 bool parseBooleanConditions(stringstream& nestedConditionalStatement, map<string, varValue>* variables);
 //helper function to evaluate comparision condition inside if statement
-bool parseComparisionConditions(stringstream& conditionalStatement, map<string, varValue>* variables);
+bool parseComparisionConditions(const string& conditionalStatement, map<string, varValue>* variables);

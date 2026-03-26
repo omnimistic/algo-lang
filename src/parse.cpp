@@ -1,5 +1,22 @@
 #include "parse.hpp"
+
+#include <algorithm>
+#include <cstdlib>
+
 using namespace std;
+
+namespace {
+[[noreturn]] void failConditionalParse(const string& message) {
+  cout << "Error: " << message << endl;
+  exit(1);
+}
+
+bool isBooleanOperatorToken(const string& token) {
+  string normalized = token;
+  transform(normalized.begin(), normalized.end(), normalized.begin(), ::tolower);
+  return normalized == "and" || normalized == "or" || normalized == "xor";
+}
+}
 
 //moves the pointer forward to ignore spaces and tabs
 void skipWhitespace(const string& str, size_t& pos) {
@@ -92,10 +109,20 @@ float parseExpression(const string& str, size_t& pos, map<string, varValue>* var
   return val;
 }
 //helper function to evaluate condition inside if statement
-bool parseComparisionConditions(string& conditionalStatement, map<string, varValue>* variables){
-    stringstream ss(conditionalStatement);
+bool parseComparisionConditions(const string& conditionalStatement, map<string, varValue>* variables){
+  string normalized = trim(conditionalStatement);
+  string lowered = normalized;
+  transform(lowered.begin(), lowered.end(), lowered.begin(), ::tolower);
+
+  if (lowered == "true") return true;
+  if (lowered == "false") return false;
+
+  stringstream ss(normalized);
     string leftSide, op, rightSide;
-    ss >> leftSide >> op >> rightSide;
+  if (!(ss >> leftSide >> op >> rightSide)) {
+    failConditionalParse("Malformed comparison in IF/ELIF statement: '" + conditionalStatement + "'.");
+  }
+
     float leftVal = getValue(leftSide, variables);
     float rightVal = getValue(rightSide, variables);
 
@@ -107,23 +134,45 @@ bool parseComparisionConditions(string& conditionalStatement, map<string, varVal
     else if (op == "<=") conditionMet = (leftVal <= rightVal);
     else if (op == ">=") conditionMet = (leftVal >= rightVal);
     else {
-        cout << "Error: Unknown operator '" << op << "' in IF statement!" << endl;
-        return;
+      failConditionalParse("Unknown operator '" + op + "' in IF/ELIF statement.");
     }
     return conditionMet;
 }
 bool parseBooleanConditions(stringstream& nestedConditionalStatement, map<string, varValue>* variables) {
     
   vector<string> parts = separateThestringstream(nestedConditionalStatement);
+    if (parts.empty()) {
+      failConditionalParse("Empty IF/ELIF condition.");
+    }
+
+    if (parts.size() % 2 == 0) {
+      failConditionalParse("Malformed IF/ELIF condition: missing comparison around boolean operator.");
+    }
+
+      for (size_t i = 0; i < parts.size(); i++) {
+      if (parts[i].find('(') != string::npos || parts[i].find(')') != string::npos) {
+        failConditionalParse("Bracket grouping is not supported in IF/ELIF conditions.");
+      }
+
+      if (i % 2 == 0 && isBooleanOperatorToken(parts[i])) {
+        failConditionalParse("Malformed IF/ELIF condition near boolean operator '" + parts[i] + "'.");
+      }
+
+      if (i % 2 == 1 && !isBooleanOperatorToken(parts[i])) {
+        failConditionalParse("Expected boolean operator (and/or/xor) but found '" + parts[i] + "'.");
+      }
+    }
+
   vector<string> temp;
 
   // PASS 1: AND / XOR
-  for (int i = 0; i < parts.size(); i++) {
+  for (size_t i = 0; i < parts.size(); i++) {
       string token = parts[i];
 
       if (token == "and" || token == "xor") {
-
-          if (temp.empty()) return false;
+        if (temp.empty() || i + 1 >= parts.size()) {
+          failConditionalParse("Malformed IF/ELIF condition near operator '" + token + "'.");
+        }
 
           bool left = parseComparisionConditions(temp.back(), variables);
           temp.pop_back();
@@ -142,7 +191,11 @@ bool parseBooleanConditions(stringstream& nestedConditionalStatement, map<string
   // PASS 2: OR
   bool result = parseComparisionConditions(temp[0], variables);
 
-  for (int i = 1; i < temp.size(); i += 2) {
+    for (size_t i = 1; i < temp.size(); i += 2) {
+      if (i + 1 >= temp.size()) {
+        failConditionalParse("Malformed IF/ELIF condition near 'or'.");
+      }
+
       string op = temp[i];
       bool right = parseComparisionConditions(temp[i + 1], variables);
 
